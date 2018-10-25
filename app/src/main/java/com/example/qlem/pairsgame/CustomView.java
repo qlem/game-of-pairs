@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import java.util.ArrayList;
@@ -21,7 +20,8 @@ public class CustomView extends View {
     private int NB_LINES = 4;
     private int NB_COLUMNS = 4;
     private List<Integer> resList = new ArrayList<>();
-    private Card[][] matrix = new Card[NB_LINES][NB_COLUMNS];
+    private Card[][] cardsMatrix = new Card[NB_LINES][NB_COLUMNS];
+    private List<Card> returnedCards = new ArrayList<>();
 
     private Rect card;
 
@@ -67,40 +67,37 @@ public class CustomView extends View {
 
         Random rand = new Random();
         int randI;
-
         for (int i = 0; i < NB_LINES; i++) {
             for (int j = 0; j < NB_COLUMNS; j++) {
                 randI = rand.nextInt(resList.size());
-                matrix[i][j] = new Card(resList.get(randI));
+                cardsMatrix[i][j] = new Card(resList.get(randI));
                 resList.remove(randI);
             }
         }
     }
 
-    public void onDraw(Canvas canvas) {
-
-        super.onDraw(canvas);
-
+    @Override
+    protected void onDraw(Canvas canvas) {
         int x;
         int y;
-        int cellSize = GAME_BOARD_SIZE / NB_COLUMNS;
-        card.set(-cellSize / 2 + 10, -cellSize / 2 + 10, cellSize / 2 - 10, cellSize / 2 - 10);
+        card.set(-GAME_BOARD_CELL_SIZE / 2 + 10, -GAME_BOARD_CELL_SIZE / 2 + 10,
+                GAME_BOARD_CELL_SIZE / 2 - 10, GAME_BOARD_CELL_SIZE / 2 - 10);
         for (int i = 0; i < NB_LINES; i++) {
-            y = GAME_BOARD_Y_ORIGIN + (cellSize * i) + (cellSize / 2);
+            y = GAME_BOARD_Y_ORIGIN + (GAME_BOARD_CELL_SIZE * i) + (GAME_BOARD_CELL_SIZE / 2);
             for (int j = 0; j < NB_COLUMNS; j++) {
-                x = GAME_BOARD_X_ORIGIN + (cellSize * j) + (cellSize / 2);
+                x = GAME_BOARD_X_ORIGIN + (GAME_BOARD_CELL_SIZE * j) + (GAME_BOARD_CELL_SIZE / 2);
                 canvas.save();
                 canvas.translate(x, y);
                 Drawable drawable;
                 Context c = getContext();
-                if (matrix[i][j].state == CardState.HIDDEN) {
+                if (cardsMatrix[i][j].state == CardState.HIDDEN) {
                     drawable = c.getDrawable(R.drawable.back_card);
                     if (drawable != null) {
                         drawable.setBounds(card);
                         drawable.draw(canvas);
                     }
-                } else if (matrix[i][j].state == CardState.SHOWN) {
-                    drawable = c.getDrawable(matrix[i][j].resId);
+                } else if (cardsMatrix[i][j].state == CardState.SHOWN) {
+                    drawable = c.getDrawable(cardsMatrix[i][j].resId);
                     if (drawable != null) {
                         drawable.setBounds(card);
                         drawable.draw(canvas);
@@ -111,16 +108,47 @@ public class CustomView extends View {
         }
     }
 
+    private void foo() {
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Card card1 = returnedCards.get(0);
+                Card card2 = returnedCards.get(1);
+                if (card1.resId == card2.resId) {
+                    card1.state = CardState.PAIRED;
+                    card2.state = CardState.PAIRED;
+                } else {
+                    card1.state = CardState.HIDDEN;
+                    card2.state = CardState.HIDDEN;
+                }
+                returnedCards.clear();
+                invalidate();
+            }
+        }, 1500);
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
             float eventX = event.getX();
             float eventY = event.getY();
             for (int i = 0; i < NB_LINES; i++) {
                 for (int j = 0; j < NB_COLUMNS; j++) {
-                    if (eventX >= matrix[i][j].fromX && eventX <= matrix[i][j].toX &&
-                            eventY >= matrix[i][j].fromY && eventY <= matrix[i][j].toY) {
-                        matrix[i][j].state = CardState.SHOWN;
-                        break;
+                    if (eventX >= cardsMatrix[i][j].fromX && eventX <= cardsMatrix[i][j].toX &&
+                            eventY >= cardsMatrix[i][j].fromY && eventY <= cardsMatrix[i][j].toY &&
+                            cardsMatrix[i][j].state != CardState.PAIRED) {
+
+                        if (returnedCards.size() == 1 && cardsMatrix[i][j] == returnedCards.get(0)) {
+                            return false;
+                        }
+
+                        if (returnedCards.size() <= 1) {
+                            cardsMatrix[i][j].state = CardState.SHOWN;
+                            returnedCards.add(cardsMatrix[i][j]);
+                            if (returnedCards.size() == 2) {
+                                foo();
+                            }
+                        }
                     }
                 }
             }
@@ -149,15 +177,12 @@ public class CustomView extends View {
 
         for (int i = 0; i < NB_LINES; i++) {
             for (int j = 0; j < NB_COLUMNS; j++) {
-                matrix[i][j].fromX = GAME_BOARD_X_ORIGIN + (GAME_BOARD_CELL_SIZE * j);
-                matrix[i][j].fromY = GAME_BOARD_Y_ORIGIN + (GAME_BOARD_CELL_SIZE * i);
-                matrix[i][j].toX = matrix[i][j].fromX + GAME_BOARD_CELL_SIZE;
-                matrix[i][j].toY = matrix[i][j].fromY + GAME_BOARD_CELL_SIZE;
+                cardsMatrix[i][j].fromX = GAME_BOARD_X_ORIGIN + (GAME_BOARD_CELL_SIZE * j);
+                cardsMatrix[i][j].fromY = GAME_BOARD_Y_ORIGIN + (GAME_BOARD_CELL_SIZE * i);
+                cardsMatrix[i][j].toX = cardsMatrix[i][j].fromX + GAME_BOARD_CELL_SIZE;
+                cardsMatrix[i][j].toY = cardsMatrix[i][j].fromY + GAME_BOARD_CELL_SIZE;
             }
         }
-
-        Log.i("DEBUG", "WIDTH: " + String.valueOf(width));
-        Log.i("DEBUG", "HEIGHT: " + String.valueOf(height));
 
         setMeasuredDimension(width, height);
     }
