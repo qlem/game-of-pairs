@@ -2,6 +2,7 @@ package com.example.qlem.pairsgame;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -14,7 +15,9 @@ import java.util.Random;
 
 import com.example.qlem.pairsgame.game.Card;
 import com.example.qlem.pairsgame.game.DataGame;
+import com.example.qlem.pairsgame.game.TextPosition;
 
+import static android.graphics.Color.rgb;
 import static com.example.qlem.pairsgame.game.CardState.HIDDEN;
 import static com.example.qlem.pairsgame.game.CardState.PAIRED;
 import static com.example.qlem.pairsgame.game.CardState.SHOWN;
@@ -31,14 +34,16 @@ public class CustomView extends View {
     private int GAME_BOARD_X_ORIGIN = 0;
     private int GAME_BOARD_Y_ORIGIN = 0;
 
-    private DataGame dataGame = new DataGame();
-
     private List<Integer> resList = new ArrayList<>();
 
     private Card[][] cards = new Card[NB_LINES][NB_COLUMNS];
     private List<Card> returnedCards = new ArrayList<>();
 
     private Rect card;
+    private Paint paintText;
+
+    private DataGame dataGame;
+    private TextPosition textPosition;
 
     public CustomView(Context c) {
         super(c);
@@ -77,6 +82,12 @@ public class CustomView extends View {
     private void init() {
 
         card = new Rect();
+
+        dataGame = new DataGame();
+        textPosition = new TextPosition();
+
+        paintText = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paintText.setColor(rgb(0, 0, 0));
 
         fillResourceList();
 
@@ -120,6 +131,19 @@ public class CustomView extends View {
                 }
                 canvas.restore();
             }
+        }
+
+        canvas.drawText("Score", textPosition.COLUMN_1, textPosition.LINE_1, paintText);
+        canvas.drawText("Player 1: " + String.valueOf(dataGame.scorePlayer1),
+                textPosition.COLUMN_1, textPosition.LINE_2, paintText);
+        canvas.drawText("Player 2: " + String.valueOf(dataGame.scorePlayer2),
+                textPosition.COLUMN_1, textPosition.LINE_3, paintText);
+
+        canvas.drawText("Turn", textPosition.COLUMN_2, textPosition.LINE_1, paintText);
+        if (dataGame.playerTurn == PLAYER_1) {
+            canvas.drawText("player 1", textPosition.COLUMN_2, textPosition.LINE_2, paintText);
+        } else {
+            canvas.drawText("player 2", textPosition.COLUMN_2, textPosition.LINE_2, paintText);
         }
     }
 
@@ -188,10 +212,34 @@ public class CustomView extends View {
         return super.onTouchEvent(event);
     }
 
+    private void setTextPosition(boolean isLandscape, int widthScreen, int heightScreen) {
+        if (!isLandscape) {
+            float lineHeight = GAME_BOARD_Y_ORIGIN / 3;
+            paintText.setTextSize(lineHeight * 0.5f);
+
+            textPosition.COLUMN_1 = 10;
+            textPosition.COLUMN_2 = widthScreen / 2;
+            textPosition.LINE_1 = lineHeight - (lineHeight / 2);
+            textPosition.LINE_2 = lineHeight * 2 - (lineHeight / 2);
+            textPosition.LINE_3 = lineHeight * 3 - (lineHeight / 2);
+        } else {
+            float lineHeight = heightScreen / 6;
+            paintText.setTextSize(lineHeight * 0.5f);
+
+            textPosition.COLUMN_1 = 10;
+            textPosition.COLUMN_2 = GAME_BOARD_X_ORIGIN + GAME_BOARD_SIZE + 10;
+            textPosition.LINE_1 = lineHeight - (lineHeight / 2);
+            textPosition.LINE_2 = lineHeight * 2 - (lineHeight / 2);
+            textPosition.LINE_3 = lineHeight * 3 - (lineHeight / 2);
+        }
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
+
+        boolean landscape = false;
 
         if (width < height) {
             GAME_BOARD_SIZE = width;
@@ -201,6 +249,7 @@ public class CustomView extends View {
             GAME_BOARD_SIZE = height;
             GAME_BOARD_X_ORIGIN = (width / 2) - (GAME_BOARD_SIZE / 2);
             GAME_BOARD_Y_ORIGIN = 0;
+            landscape = true;
         }
 
         GAME_BOARD_CELL_SIZE = GAME_BOARD_SIZE / NB_COLUMNS;
@@ -213,6 +262,8 @@ public class CustomView extends View {
                 cards[i][j].toY = cards[i][j].fromY + GAME_BOARD_CELL_SIZE;
             }
         }
+
+        setTextPosition(landscape, width, height);
 
         setMeasuredDimension(width, height);
     }
