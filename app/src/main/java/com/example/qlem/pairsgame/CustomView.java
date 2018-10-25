@@ -7,20 +7,35 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.example.qlem.pairsgame.game.Card;
+import com.example.qlem.pairsgame.game.DataGame;
+
+import static com.example.qlem.pairsgame.game.CardState.HIDDEN;
+import static com.example.qlem.pairsgame.game.CardState.PAIRED;
+import static com.example.qlem.pairsgame.game.CardState.SHOWN;
+import static com.example.qlem.pairsgame.game.Player.PLAYER_1;
+import static com.example.qlem.pairsgame.game.Player.PLAYER_2;
+
 public class CustomView extends View {
+
+    private int NB_LINES = 4;
+    private int NB_COLUMNS = 4;
 
     private int GAME_BOARD_SIZE = 0;
     private int GAME_BOARD_CELL_SIZE = 0;
     private int GAME_BOARD_X_ORIGIN = 0;
     private int GAME_BOARD_Y_ORIGIN = 0;
-    private int NB_LINES = 4;
-    private int NB_COLUMNS = 4;
+
+    private DataGame dataGame = new DataGame();
+
     private List<Integer> resList = new ArrayList<>();
-    private Card[][] cardsMatrix = new Card[NB_LINES][NB_COLUMNS];
+
+    private Card[][] cards = new Card[NB_LINES][NB_COLUMNS];
     private List<Card> returnedCards = new ArrayList<>();
 
     private Rect card;
@@ -40,7 +55,7 @@ public class CustomView extends View {
         init();
     }
 
-    private void initResourceList() {
+    private void fillResourceList() {
         resList.add(R.drawable.chicken);
         resList.add(R.drawable.chicken);
         resList.add(R.drawable.cow);
@@ -63,14 +78,14 @@ public class CustomView extends View {
 
         card = new Rect();
 
-        initResourceList();
+        fillResourceList();
 
         Random rand = new Random();
         int randI;
         for (int i = 0; i < NB_LINES; i++) {
             for (int j = 0; j < NB_COLUMNS; j++) {
                 randI = rand.nextInt(resList.size());
-                cardsMatrix[i][j] = new Card(resList.get(randI));
+                cards[i][j] = new Card(resList.get(randI));
                 resList.remove(randI);
             }
         }
@@ -90,14 +105,14 @@ public class CustomView extends View {
                 canvas.translate(x, y);
                 Drawable drawable;
                 Context c = getContext();
-                if (cardsMatrix[i][j].state == CardState.HIDDEN) {
+                if (cards[i][j].state == HIDDEN) {
                     drawable = c.getDrawable(R.drawable.back_card);
                     if (drawable != null) {
                         drawable.setBounds(card);
                         drawable.draw(canvas);
                     }
-                } else if (cardsMatrix[i][j].state == CardState.SHOWN) {
-                    drawable = c.getDrawable(cardsMatrix[i][j].resId);
+                } else if (cards[i][j].state == SHOWN) {
+                    drawable = c.getDrawable(cards[i][j].resId);
                     if (drawable != null) {
                         drawable.setBounds(card);
                         drawable.draw(canvas);
@@ -108,19 +123,34 @@ public class CustomView extends View {
         }
     }
 
-    private void foo() {
+    private void validateFlipping() {
         postDelayed(new Runnable() {
             @Override
             public void run() {
                 Card card1 = returnedCards.get(0);
                 Card card2 = returnedCards.get(1);
                 if (card1.resId == card2.resId) {
-                    card1.state = CardState.PAIRED;
-                    card2.state = CardState.PAIRED;
+                    card1.state = PAIRED;
+                    card2.state = PAIRED;
+
+                    if (dataGame.playerTurn == PLAYER_1) {
+                        dataGame.scorePlayer1++;
+                    } else {
+                        dataGame.scorePlayer2++;
+                    }
+
                 } else {
-                    card1.state = CardState.HIDDEN;
-                    card2.state = CardState.HIDDEN;
+                    card1.state = HIDDEN;
+                    card2.state = HIDDEN;
+
                 }
+
+                if (dataGame.playerTurn == PLAYER_1) {
+                    dataGame.playerTurn = PLAYER_2;
+                } else {
+                    dataGame.playerTurn = PLAYER_1;
+                }
+
                 returnedCards.clear();
                 invalidate();
             }
@@ -134,19 +164,19 @@ public class CustomView extends View {
             float eventY = event.getY();
             for (int i = 0; i < NB_LINES; i++) {
                 for (int j = 0; j < NB_COLUMNS; j++) {
-                    if (eventX >= cardsMatrix[i][j].fromX && eventX <= cardsMatrix[i][j].toX &&
-                            eventY >= cardsMatrix[i][j].fromY && eventY <= cardsMatrix[i][j].toY &&
-                            cardsMatrix[i][j].state != CardState.PAIRED) {
+                    if (eventX >= cards[i][j].fromX && eventX <= cards[i][j].toX &&
+                            eventY >= cards[i][j].fromY && eventY <= cards[i][j].toY &&
+                            cards[i][j].state != PAIRED) {
 
-                        if (returnedCards.size() == 1 && cardsMatrix[i][j] == returnedCards.get(0)) {
+                        if (returnedCards.size() == 1 && cards[i][j] == returnedCards.get(0)) {
                             return false;
                         }
 
                         if (returnedCards.size() <= 1) {
-                            cardsMatrix[i][j].state = CardState.SHOWN;
-                            returnedCards.add(cardsMatrix[i][j]);
+                            cards[i][j].state = SHOWN;
+                            returnedCards.add(cards[i][j]);
                             if (returnedCards.size() == 2) {
-                                foo();
+                                validateFlipping();
                             }
                         }
                     }
@@ -177,10 +207,10 @@ public class CustomView extends View {
 
         for (int i = 0; i < NB_LINES; i++) {
             for (int j = 0; j < NB_COLUMNS; j++) {
-                cardsMatrix[i][j].fromX = GAME_BOARD_X_ORIGIN + (GAME_BOARD_CELL_SIZE * j);
-                cardsMatrix[i][j].fromY = GAME_BOARD_Y_ORIGIN + (GAME_BOARD_CELL_SIZE * i);
-                cardsMatrix[i][j].toX = cardsMatrix[i][j].fromX + GAME_BOARD_CELL_SIZE;
-                cardsMatrix[i][j].toY = cardsMatrix[i][j].fromY + GAME_BOARD_CELL_SIZE;
+                cards[i][j].fromX = GAME_BOARD_X_ORIGIN + (GAME_BOARD_CELL_SIZE * j);
+                cards[i][j].fromY = GAME_BOARD_Y_ORIGIN + (GAME_BOARD_CELL_SIZE * i);
+                cards[i][j].toX = cards[i][j].fromX + GAME_BOARD_CELL_SIZE;
+                cards[i][j].toY = cards[i][j].fromY + GAME_BOARD_CELL_SIZE;
             }
         }
 
@@ -188,7 +218,7 @@ public class CustomView extends View {
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+    protected void onSizeChanged(int w, int h, int oldW, int oldH) {
         // Log.i("DEBUG 02", String.valueOf(w) + " " + String.valueOf(h));
     }
 }

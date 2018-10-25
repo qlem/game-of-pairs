@@ -1,4 +1,4 @@
-package com.example.qlem.pairsgame;
+package com.example.qlem.pairsgame.game;
 
 public enum CardState {
     SHOWN,

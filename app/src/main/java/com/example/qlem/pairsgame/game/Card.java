@@ -1,4 +1,4 @@
-package com.example.qlem.pairsgame;
+package com.example.qlem.pairsgame.game;
 
 public class Card {
     public int resId;
@@ -8,7 +8,7 @@ public class Card {
     public int toY;
     public CardState state;
 
-    Card(int resId) {
+    public Card(int resId) {
         this.resId = resId;
         this.state = CardState.HIDDEN;
     }
