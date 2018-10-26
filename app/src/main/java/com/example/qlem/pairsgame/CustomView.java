@@ -89,7 +89,7 @@ public class CustomView extends View {
         int randI;
         for (int i = 0; i < 16; i++) {
             randI = rand.nextInt(resList.size());
-            cards.add(new Card(resList.get(randI)));
+            cards.add(new Card(resList.get(randI), i));
             resList.remove(randI);
         }
     }
@@ -167,6 +167,16 @@ public class CustomView extends View {
         }, 1500);
     }
 
+    private boolean isMovedOutTargetedCard(int index, float eventX, float eventY) {
+        int line = index / 4;
+        int column = - line * 4 + index;
+        int fromX = GAME_BOARD_X_ORIGIN + (GAME_BOARD_CELL_SIZE * column);
+        int fromY = GAME_BOARD_Y_ORIGIN + (GAME_BOARD_CELL_SIZE * line);
+        int toX = GAME_BOARD_X_ORIGIN + (GAME_BOARD_CELL_SIZE * column) + GAME_BOARD_CELL_SIZE;
+        int toY = GAME_BOARD_Y_ORIGIN + (GAME_BOARD_CELL_SIZE * line) + GAME_BOARD_CELL_SIZE;
+        return eventX <= fromX || eventX >= toX || eventY <= fromY || eventY >= toY;
+    }
+
     private Card getTargetedCard(float eventX, float eventY) {
         int column = (Math.round(eventX) - GAME_BOARD_X_ORIGIN) / GAME_BOARD_CELL_SIZE;
         int line = (Math.round(eventY) - GAME_BOARD_Y_ORIGIN) / GAME_BOARD_CELL_SIZE;
@@ -190,7 +200,8 @@ public class CustomView extends View {
                         eventX <= GAME_BOARD_X_ORIGIN + GAME_BOARD_SIZE &&
                         eventY <= GAME_BOARD_Y_ORIGIN + GAME_BOARD_SIZE) {
                     targetedCard = getTargetedCard(eventX, eventY);
-                    if (targetedCard.state == CardState.PAIRED) {
+                    if (targetedCard.state == CardState.PAIRED || (returnedCards.size() == 1 &&
+                            targetedCard == returnedCards.get(0))) {
                         targetedCard = null;
                         return false;
                     }
@@ -206,9 +217,7 @@ public class CustomView extends View {
                     }
                     Card targetedCardUp = getTargetedCard(eventX, eventY);
                     if (targetedCard != targetedCardUp) {
-                        return false;
-                    }
-                    if (returnedCards.size() == 1 && targetedCard == returnedCards.get(0)) {
+                        targetedCard = null;
                         return false;
                     }
                     if (returnedCards.size() <= 1) {
@@ -224,12 +233,11 @@ public class CustomView extends View {
                 invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
-                /* if (targetedCard != null && (eventX < targetedCard.fromX ||
-                        eventX > targetedCard.toX || eventY < targetedCard.fromY ||
-                        eventY > targetedCard.toY)) {
+                if (targetedCard != null &&
+                        isMovedOutTargetedCard(targetedCard.position, eventX, eventY)) {
                     targetedCard = null;
                     return false;
-                } */
+                }
                 break;
         }
         return true;
