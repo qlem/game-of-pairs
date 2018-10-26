@@ -24,22 +24,20 @@ import static android.graphics.Color.rgb;
 
 public class CustomView extends View {
 
-    private int NB_LINES = 4;
-    private int NB_COLUMNS = 4;
     private int GAME_BOARD_SIZE = 0;
     private int GAME_BOARD_CELL_SIZE = 0;
     private int GAME_BOARD_X_ORIGIN = 0;
     private int GAME_BOARD_Y_ORIGIN = 0;
 
     private List<Integer> resList;
-    private Card[][] cards;
+    private List<Card> cards;
     private List<Card> returnedCards;
-
-    private Rect card;
-    private Paint paintText;
 
     private DataGame dataGame;
     private TextPosition textPosition;
+
+    private Rect card;
+    private Paint paintText;
 
     private Card targetedCard;
 
@@ -78,61 +76,53 @@ public class CustomView extends View {
     }
 
     private void init() {
-
         resList = new ArrayList<>();
-        cards = new Card[NB_LINES][NB_COLUMNS];
+        cards = new ArrayList<>();
         returnedCards = new ArrayList<>();
-
         card = new Rect();
-
         dataGame = new DataGame();
         textPosition = new TextPosition();
-
         paintText = new Paint(Paint.ANTI_ALIAS_FLAG);
         paintText.setColor(rgb(0, 0, 0));
-
         fillResourceList();
-
         Random rand = new Random();
         int randI;
-        for (int i = 0; i < NB_LINES; i++) {
-            for (int j = 0; j < NB_COLUMNS; j++) {
-                randI = rand.nextInt(resList.size());
-                cards[i][j] = new Card(resList.get(randI));
-                resList.remove(randI);
-            }
+        for (int i = 0; i < 16; i++) {
+            randI = rand.nextInt(resList.size());
+            cards.add(new Card(resList.get(randI)));
+            resList.remove(randI);
         }
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        int x;
-        int y;
         card.set(-GAME_BOARD_CELL_SIZE / 2 + 10, -GAME_BOARD_CELL_SIZE / 2 + 10,
                 GAME_BOARD_CELL_SIZE / 2 - 10, GAME_BOARD_CELL_SIZE / 2 - 10);
-        for (int i = 0; i < NB_LINES; i++) {
-            y = GAME_BOARD_Y_ORIGIN + (GAME_BOARD_CELL_SIZE * i) + (GAME_BOARD_CELL_SIZE / 2);
-            for (int j = 0; j < NB_COLUMNS; j++) {
-                x = GAME_BOARD_X_ORIGIN + (GAME_BOARD_CELL_SIZE * j) + (GAME_BOARD_CELL_SIZE / 2);
-                canvas.save();
-                canvas.translate(x, y);
-                Drawable drawable;
-                Context c = getContext();
-                if (cards[i][j].state == CardState.HIDDEN) {
-                    drawable = c.getDrawable(R.drawable.back_card);
-                    if (drawable != null) {
-                        drawable.setBounds(card);
-                        drawable.draw(canvas);
-                    }
-                } else if (cards[i][j].state == CardState.SHOWN) {
-                    drawable = c.getDrawable(cards[i][j].resId);
-                    if (drawable != null) {
-                        drawable.setBounds(card);
-                        drawable.draw(canvas);
-                    }
+        int x;
+        int y;
+        for (int i = 0; i < 16; i++) {
+            int line = i / 4;
+            int column = - line * 4 + i;
+            x = GAME_BOARD_X_ORIGIN + (GAME_BOARD_CELL_SIZE * column) + (GAME_BOARD_CELL_SIZE / 2);
+            y = GAME_BOARD_Y_ORIGIN + (GAME_BOARD_CELL_SIZE * line) + (GAME_BOARD_CELL_SIZE / 2);
+            canvas.save();
+            canvas.translate(x, y);
+            Drawable drawable;
+            Context c = getContext();
+            if (cards.get(i).state == CardState.HIDDEN) {
+                drawable = c.getDrawable(R.drawable.back_card);
+                if (drawable != null) {
+                    drawable.setBounds(card);
+                    drawable.draw(canvas);
                 }
-                canvas.restore();
+            } else if (cards.get(i).state == CardState.SHOWN) {
+                drawable = c.getDrawable(cards.get(i).resId);
+                if (drawable != null) {
+                    drawable.setBounds(card);
+                    drawable.draw(canvas);
+                }
             }
+            canvas.restore();
         }
 
         canvas.drawText("Score", textPosition.COLUMN_1, textPosition.LINE_1, paintText);
@@ -140,7 +130,6 @@ public class CustomView extends View {
                 textPosition.COLUMN_1, textPosition.LINE_2, paintText);
         canvas.drawText("Player 2: " + String.valueOf(dataGame.scorePlayer2),
                 textPosition.COLUMN_1, textPosition.LINE_3, paintText);
-
         canvas.drawText("Turn", textPosition.COLUMN_2, textPosition.LINE_1, paintText);
         if (dataGame.playerTurn == Player.PLAYER_1) {
             canvas.drawText("player 1", textPosition.COLUMN_2, textPosition.LINE_2, paintText);
@@ -158,24 +147,20 @@ public class CustomView extends View {
                 if (card1.resId == card2.resId) {
                     card1.state = CardState.PAIRED;
                     card2.state = CardState.PAIRED;
-
                     if (dataGame.playerTurn == Player.PLAYER_1) {
                         dataGame.scorePlayer1++;
                     } else {
                         dataGame.scorePlayer2++;
                     }
-
                 } else {
                     card1.state = CardState.HIDDEN;
                     card2.state = CardState.HIDDEN;
                 }
-
                 if (dataGame.playerTurn == Player.PLAYER_1) {
                     dataGame.playerTurn = Player.PLAYER_2;
                 } else {
                     dataGame.playerTurn = Player.PLAYER_1;
                 }
-
                 returnedCards.clear();
                 invalidate();
             }
@@ -183,15 +168,10 @@ public class CustomView extends View {
     }
 
     private Card getTargetedCard(float eventX, float eventY) {
-        for (int i = 0; i < NB_LINES; i++) {
-            for (int j = 0; j < NB_COLUMNS; j++) {
-                if (eventX >= cards[i][j].fromX && eventX <= cards[i][j].toX &&
-                        eventY >= cards[i][j].fromY && eventY <= cards[i][j].toY) {
-                    return cards[i][j];
-                }
-            }
-        }
-        return null;
+        int column = (Math.round(eventX) - GAME_BOARD_X_ORIGIN) / GAME_BOARD_CELL_SIZE;
+        int line = (Math.round(eventY) - GAME_BOARD_Y_ORIGIN) / GAME_BOARD_CELL_SIZE;
+        int index = line * 4 + column;
+        return cards.get(index);
     }
 
     @Override
@@ -202,19 +182,14 @@ public class CustomView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
         float eventX = event.getX();
         float eventY = event.getY();
-
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 if (eventX >= GAME_BOARD_X_ORIGIN && eventY >= GAME_BOARD_Y_ORIGIN &&
                         eventX <= GAME_BOARD_X_ORIGIN + GAME_BOARD_SIZE &&
                         eventY <= GAME_BOARD_Y_ORIGIN + GAME_BOARD_SIZE) {
                     targetedCard = getTargetedCard(eventX, eventY);
-                    if (targetedCard == null) {
-                        return false;
-                    }
                     if (targetedCard.state == CardState.PAIRED) {
                         targetedCard = null;
                         return false;
@@ -249,12 +224,12 @@ public class CustomView extends View {
                 invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (targetedCard != null && (eventX < targetedCard.fromX ||
+                /* if (targetedCard != null && (eventX < targetedCard.fromX ||
                         eventX > targetedCard.toX || eventY < targetedCard.fromY ||
                         eventY > targetedCard.toY)) {
                     targetedCard = null;
                     return false;
-                }
+                } */
                 break;
         }
         return true;
@@ -264,7 +239,6 @@ public class CustomView extends View {
         if (!isLandscape) {
             float lineHeight = GAME_BOARD_Y_ORIGIN / 3;
             paintText.setTextSize(lineHeight * 0.5f);
-
             textPosition.COLUMN_1 = 10;
             textPosition.COLUMN_2 = widthScreen / 2;
             textPosition.LINE_1 = lineHeight - (lineHeight / 2);
@@ -273,7 +247,6 @@ public class CustomView extends View {
         } else {
             float lineHeight = heightScreen / 6;
             paintText.setTextSize(lineHeight * 0.5f);
-
             textPosition.COLUMN_1 = 10;
             textPosition.COLUMN_2 = GAME_BOARD_X_ORIGIN + GAME_BOARD_SIZE + 10;
             textPosition.LINE_1 = lineHeight - (lineHeight / 2);
@@ -286,9 +259,7 @@ public class CustomView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
-
         boolean landscape = false;
-
         if (width < height) {
             GAME_BOARD_SIZE = width;
             GAME_BOARD_X_ORIGIN = 0;
@@ -299,20 +270,8 @@ public class CustomView extends View {
             GAME_BOARD_Y_ORIGIN = 0;
             landscape = true;
         }
-
-        GAME_BOARD_CELL_SIZE = GAME_BOARD_SIZE / NB_COLUMNS;
-
-        for (int i = 0; i < NB_LINES; i++) {
-            for (int j = 0; j < NB_COLUMNS; j++) {
-                cards[i][j].fromX = GAME_BOARD_X_ORIGIN + (GAME_BOARD_CELL_SIZE * j);
-                cards[i][j].fromY = GAME_BOARD_Y_ORIGIN + (GAME_BOARD_CELL_SIZE * i);
-                cards[i][j].toX = cards[i][j].fromX + GAME_BOARD_CELL_SIZE;
-                cards[i][j].toY = cards[i][j].fromY + GAME_BOARD_CELL_SIZE;
-            }
-        }
-
+        GAME_BOARD_CELL_SIZE = GAME_BOARD_SIZE / 4;
         setTextPosition(landscape, width, height);
-
         setMeasuredDimension(width, height);
     }
 }

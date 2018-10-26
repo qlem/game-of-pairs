@@ -2,11 +2,11 @@ package com.example.qlem.pairsgame.game;
 
 public class Card {
     public int resId;
-    public int fromX;
+    public CardState state;
+    /* public int fromX;
     public int fromY;
     public int toX;
-    public int toY;
-    public CardState state;
+    public int toY; */
 
     public Card(int resId) {
         this.resId = resId;
