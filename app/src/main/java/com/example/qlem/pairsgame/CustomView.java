@@ -14,36 +14,34 @@ import java.util.List;
 import java.util.Random;
 
 import com.example.qlem.pairsgame.game.Card;
+import com.example.qlem.pairsgame.game.CardState;
 import com.example.qlem.pairsgame.game.DataGame;
+import com.example.qlem.pairsgame.game.Player;
 import com.example.qlem.pairsgame.game.TextPosition;
 
 import static android.graphics.Color.rgb;
-import static com.example.qlem.pairsgame.game.CardState.HIDDEN;
-import static com.example.qlem.pairsgame.game.CardState.PAIRED;
-import static com.example.qlem.pairsgame.game.CardState.SHOWN;
-import static com.example.qlem.pairsgame.game.Player.PLAYER_1;
-import static com.example.qlem.pairsgame.game.Player.PLAYER_2;
+
 
 public class CustomView extends View {
 
     private int NB_LINES = 4;
     private int NB_COLUMNS = 4;
-
     private int GAME_BOARD_SIZE = 0;
     private int GAME_BOARD_CELL_SIZE = 0;
     private int GAME_BOARD_X_ORIGIN = 0;
     private int GAME_BOARD_Y_ORIGIN = 0;
 
-    private List<Integer> resList = new ArrayList<>();
-
-    private Card[][] cards = new Card[NB_LINES][NB_COLUMNS];
-    private List<Card> returnedCards = new ArrayList<>();
+    private List<Integer> resList;
+    private Card[][] cards;
+    private List<Card> returnedCards;
 
     private Rect card;
     private Paint paintText;
 
     private DataGame dataGame;
     private TextPosition textPosition;
+
+    private Card targetedCard;
 
     public CustomView(Context c) {
         super(c);
@@ -81,6 +79,10 @@ public class CustomView extends View {
 
     private void init() {
 
+        resList = new ArrayList<>();
+        cards = new Card[NB_LINES][NB_COLUMNS];
+        returnedCards = new ArrayList<>();
+
         card = new Rect();
 
         dataGame = new DataGame();
@@ -116,13 +118,13 @@ public class CustomView extends View {
                 canvas.translate(x, y);
                 Drawable drawable;
                 Context c = getContext();
-                if (cards[i][j].state == HIDDEN) {
+                if (cards[i][j].state == CardState.HIDDEN) {
                     drawable = c.getDrawable(R.drawable.back_card);
                     if (drawable != null) {
                         drawable.setBounds(card);
                         drawable.draw(canvas);
                     }
-                } else if (cards[i][j].state == SHOWN) {
+                } else if (cards[i][j].state == CardState.SHOWN) {
                     drawable = c.getDrawable(cards[i][j].resId);
                     if (drawable != null) {
                         drawable.setBounds(card);
@@ -140,7 +142,7 @@ public class CustomView extends View {
                 textPosition.COLUMN_1, textPosition.LINE_3, paintText);
 
         canvas.drawText("Turn", textPosition.COLUMN_2, textPosition.LINE_1, paintText);
-        if (dataGame.playerTurn == PLAYER_1) {
+        if (dataGame.playerTurn == Player.PLAYER_1) {
             canvas.drawText("player 1", textPosition.COLUMN_2, textPosition.LINE_2, paintText);
         } else {
             canvas.drawText("player 2", textPosition.COLUMN_2, textPosition.LINE_2, paintText);
@@ -154,25 +156,24 @@ public class CustomView extends View {
                 Card card1 = returnedCards.get(0);
                 Card card2 = returnedCards.get(1);
                 if (card1.resId == card2.resId) {
-                    card1.state = PAIRED;
-                    card2.state = PAIRED;
+                    card1.state = CardState.PAIRED;
+                    card2.state = CardState.PAIRED;
 
-                    if (dataGame.playerTurn == PLAYER_1) {
+                    if (dataGame.playerTurn == Player.PLAYER_1) {
                         dataGame.scorePlayer1++;
                     } else {
                         dataGame.scorePlayer2++;
                     }
 
                 } else {
-                    card1.state = HIDDEN;
-                    card2.state = HIDDEN;
-
+                    card1.state = CardState.HIDDEN;
+                    card2.state = CardState.HIDDEN;
                 }
 
-                if (dataGame.playerTurn == PLAYER_1) {
-                    dataGame.playerTurn = PLAYER_2;
+                if (dataGame.playerTurn == Player.PLAYER_1) {
+                    dataGame.playerTurn = Player.PLAYER_2;
                 } else {
-                    dataGame.playerTurn = PLAYER_1;
+                    dataGame.playerTurn = Player.PLAYER_1;
                 }
 
                 returnedCards.clear();
@@ -181,35 +182,82 @@ public class CustomView extends View {
         }, 1500);
     }
 
+    private Card getTargetedCard(float eventX, float eventY) {
+        for (int i = 0; i < NB_LINES; i++) {
+            for (int j = 0; j < NB_COLUMNS; j++) {
+                if (eventX >= cards[i][j].fromX && eventX <= cards[i][j].toX &&
+                        eventY >= cards[i][j].fromY && eventY <= cards[i][j].toY) {
+                    return cards[i][j];
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean performClick() {
+        super.performClick();
+        return true;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            float eventX = event.getX();
-            float eventY = event.getY();
-            for (int i = 0; i < NB_LINES; i++) {
-                for (int j = 0; j < NB_COLUMNS; j++) {
-                    if (eventX >= cards[i][j].fromX && eventX <= cards[i][j].toX &&
-                            eventY >= cards[i][j].fromY && eventY <= cards[i][j].toY &&
-                            cards[i][j].state != PAIRED) {
 
-                        if (returnedCards.size() == 1 && cards[i][j] == returnedCards.get(0)) {
-                            return false;
-                        }
+        float eventX = event.getX();
+        float eventY = event.getY();
 
-                        if (returnedCards.size() <= 1) {
-                            cards[i][j].state = SHOWN;
-                            returnedCards.add(cards[i][j]);
-                            if (returnedCards.size() == 2) {
-                                validateFlipping();
-                            }
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                if (eventX >= GAME_BOARD_X_ORIGIN && eventY >= GAME_BOARD_Y_ORIGIN &&
+                        eventX <= GAME_BOARD_X_ORIGIN + GAME_BOARD_SIZE &&
+                        eventY <= GAME_BOARD_Y_ORIGIN + GAME_BOARD_SIZE) {
+                    targetedCard = getTargetedCard(eventX, eventY);
+                    if (targetedCard == null) {
+                        return false;
+                    }
+                    if (targetedCard.state == CardState.PAIRED) {
+                        targetedCard = null;
+                        return false;
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                if (eventX >= GAME_BOARD_X_ORIGIN && eventY >= GAME_BOARD_Y_ORIGIN &&
+                        eventX <= GAME_BOARD_X_ORIGIN + GAME_BOARD_SIZE &&
+                        eventY <= GAME_BOARD_Y_ORIGIN + GAME_BOARD_SIZE) {
+                    if (targetedCard == null || returnedCards.size() == 2) {
+                        targetedCard = null;
+                        return false;
+                    }
+                    Card targetedCardUp = getTargetedCard(eventX, eventY);
+                    if (targetedCard != targetedCardUp) {
+                        return false;
+                    }
+                    if (returnedCards.size() == 1 && targetedCard == returnedCards.get(0)) {
+                        return false;
+                    }
+                    if (returnedCards.size() <= 1) {
+                        targetedCard.state = CardState.SHOWN;
+                        returnedCards.add(targetedCard);
+                        if (returnedCards.size() == 2) {
+                            validateFlipping();
                         }
                     }
                 }
-            }
-            invalidate();
-            return true;
+                targetedCard = null;
+                performClick();
+                invalidate();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (targetedCard != null && (eventX < targetedCard.fromX ||
+                        eventX > targetedCard.toX || eventY < targetedCard.fromY ||
+                        eventY > targetedCard.toY)) {
+                    targetedCard = null;
+                    return false;
+                }
+                break;
         }
-        return super.onTouchEvent(event);
+        return true;
     }
 
     private void setTextPosition(boolean isLandscape, int widthScreen, int heightScreen) {
@@ -266,10 +314,5 @@ public class CustomView extends View {
         setTextPosition(landscape, width, height);
 
         setMeasuredDimension(width, height);
-    }
-
-    @Override
-    protected void onSizeChanged(int w, int h, int oldW, int oldH) {
-        // Log.i("DEBUG 02", String.valueOf(w) + " " + String.valueOf(h));
     }
 }
