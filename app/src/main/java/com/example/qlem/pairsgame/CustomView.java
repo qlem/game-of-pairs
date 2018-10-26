@@ -167,9 +167,9 @@ public class CustomView extends View {
         }, 1500);
     }
 
-    private boolean isMovedOutTargetedCard(int index, float eventX, float eventY) {
-        int line = index / 4;
-        int column = - line * 4 + index;
+    private boolean isMovedOutTargetedCard(int cardIndex, float eventX, float eventY) {
+        int line = cardIndex / 4;
+        int column = - line * 4 + cardIndex;
         int fromX = GAME_BOARD_X_ORIGIN + (GAME_BOARD_CELL_SIZE * column);
         int fromY = GAME_BOARD_Y_ORIGIN + (GAME_BOARD_CELL_SIZE * line);
         int toX = GAME_BOARD_X_ORIGIN + (GAME_BOARD_CELL_SIZE * column) + GAME_BOARD_CELL_SIZE;
@@ -220,17 +220,15 @@ public class CustomView extends View {
                         targetedCard = null;
                         return false;
                     }
-                    if (returnedCards.size() <= 1) {
-                        targetedCard.state = CardState.SHOWN;
-                        returnedCards.add(targetedCard);
-                        if (returnedCards.size() == 2) {
-                            validateFlipping();
-                        }
+                    targetedCard.state = CardState.SHOWN;
+                    returnedCards.add(targetedCard);
+                    if (returnedCards.size() == 2) {
+                        validateFlipping();
                     }
+                    performClick();
+                    invalidate();
                 }
                 targetedCard = null;
-                performClick();
-                invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (targetedCard != null &&
