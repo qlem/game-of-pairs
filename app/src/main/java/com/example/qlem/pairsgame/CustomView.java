@@ -125,7 +125,7 @@ public class CustomView extends View {
             canvas.restore();
         }
 
-        canvas.drawText("Score", textPosition.COLUMN_1, textPosition.LINE_1, paintText);
+        /* canvas.drawText("Score", textPosition.COLUMN_1, textPosition.LINE_1, paintText);
         canvas.drawText("Player 1: " + String.valueOf(dataGame.scorePlayer1),
                 textPosition.COLUMN_1, textPosition.LINE_2, paintText);
         canvas.drawText("Player 2: " + String.valueOf(dataGame.scorePlayer2),
@@ -135,7 +135,7 @@ public class CustomView extends View {
             canvas.drawText("player 1", textPosition.COLUMN_2, textPosition.LINE_2, paintText);
         } else {
             canvas.drawText("player 2", textPosition.COLUMN_2, textPosition.LINE_2, paintText);
-        }
+        } */
     }
 
     private void validateFlipping() {
@@ -269,15 +269,31 @@ public class CustomView extends View {
         if (width < height) {
             GAME_BOARD_SIZE = width;
             GAME_BOARD_X_ORIGIN = 0;
-            GAME_BOARD_Y_ORIGIN = (height / 2) - (GAME_BOARD_SIZE / 2);
+            // GAME_BOARD_Y_ORIGIN = (height / 2) - (GAME_BOARD_SIZE / 2);
+            GAME_BOARD_Y_ORIGIN = 0;
         } else {
             GAME_BOARD_SIZE = height;
-            GAME_BOARD_X_ORIGIN = (width / 2) - (GAME_BOARD_SIZE / 2);
+            // GAME_BOARD_X_ORIGIN = (width / 2) - (GAME_BOARD_SIZE / 2);
+            GAME_BOARD_X_ORIGIN = 0;
             GAME_BOARD_Y_ORIGIN = 0;
             landscape = true;
         }
         GAME_BOARD_CELL_SIZE = GAME_BOARD_SIZE / 4;
-        setTextPosition(landscape, width, height);
-        setMeasuredDimension(width, height);
+        // setTextPosition(landscape, width, height);
+        // setMeasuredDimension(width, height);
+
+        setMeasuredDimension(GAME_BOARD_SIZE, GAME_BOARD_SIZE);
+    }
+
+    public int getScorePlayer1() {
+        return dataGame.scorePlayer1;
+    }
+
+    public int getScorePlayer2() {
+        return dataGame.scorePlayer2;
+    }
+
+    public Player getPlayerTurn() {
+        return dataGame.playerTurn;
     }
 }

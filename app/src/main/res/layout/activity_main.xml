@@ -1,12 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:layout_editor_absoluteY="81dp">
+
+    <TextView
+        android:id="@+id/score_board"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="@string/score"
+        app:layout_constraintBottom_toTopOf="@+id/game_board"
+        app:layout_constraintEnd_toStartOf="@+id/turn_board"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/turn_board"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="@string/turn"
+        app:layout_constraintBottom_toTopOf="@+id/game_board"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/score_board"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.example.qlem.pairsgame.CustomView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:id="@+id/game_board"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
