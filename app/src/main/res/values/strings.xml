@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Pairs Game</string>
-    <string name="score">Score</string>
-    <string name="turn">Turn</string>
+    <string name="score_title">Score</string>
+    <string name="score_player_1">player 1: 0</string>
+    <string name="score_player_2">player 2: 0</string>
+    <string name="player_turn">player 1\'s turn</string>
 </resources>

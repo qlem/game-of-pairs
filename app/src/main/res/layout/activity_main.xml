@@ -9,24 +9,31 @@
     tools:layout_editor_absoluteY="81dp">
 
     <TextView
-        android:id="@+id/score_board"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:text="@string/score"
-        app:layout_constraintBottom_toTopOf="@+id/game_board"
-        app:layout_constraintEnd_toStartOf="@+id/turn_board"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:id="@+id/score_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/score_title" />
 
     <TextView
-        android:id="@+id/turn_board"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:text="@string/turn"
-        app:layout_constraintBottom_toTopOf="@+id/game_board"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/score_board"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:id="@+id/score_player_1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/score_player_1"
+        app:layout_constraintTop_toBottomOf="@+id/score_title" />
+
+    <TextView
+        android:id="@+id/score_player_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/score_player_2"
+        app:layout_constraintTop_toBottomOf="@+id/score_player_1" />
+
+    <TextView
+        android:id="@+id/player_turn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/player_turn"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <com.example.qlem.pairsgame.CustomView
         android:id="@+id/game_board"
