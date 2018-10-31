@@ -16,6 +16,7 @@ import java.util.Random;
 import com.example.qlem.pairsgame.game.Card;
 import com.example.qlem.pairsgame.game.CardState;
 import com.example.qlem.pairsgame.game.DataGame;
+import com.example.qlem.pairsgame.game.GameState;
 import com.example.qlem.pairsgame.game.Player;
 import com.example.qlem.pairsgame.game.TextPosition;
 
@@ -92,10 +93,10 @@ public class CustomView extends View {
             cards.add(new Card(resList.get(randI), i));
             resList.remove(randI);
         }
+        dataGame.gameState = GameState.RUNNING;
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
+    private void drawGameBoard(Canvas canvas) {
         card.set(-GAME_BOARD_CELL_SIZE / 2 + 10, -GAME_BOARD_CELL_SIZE / 2 + 10,
                 GAME_BOARD_CELL_SIZE / 2 - 10, GAME_BOARD_CELL_SIZE / 2 - 10);
         int x;
@@ -124,6 +125,13 @@ public class CustomView extends View {
             }
             canvas.restore();
         }
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        if (dataGame.gameState == GameState.RUNNING) {
+            drawGameBoard(canvas);
+        }
 
         canvas.drawText("Score", textPosition.COLUMN_1, textPosition.LINE_1, paintText);
         canvas.drawText("Player 1: " + String.valueOf(dataGame.scorePlayer1),
@@ -138,6 +146,16 @@ public class CustomView extends View {
         }
     }
 
+    private boolean isEndGame() {
+        int count = 0;
+        for (int i = 0; i < 16; i++) {
+            if (cards.get(i).state == CardState.PAIRED) {
+                count++;
+            }
+        }
+        return count == 16;
+    }
+
     private void validateFlipping() {
         postDelayed(new Runnable() {
             @Override
@@ -147,6 +165,9 @@ public class CustomView extends View {
                 if (card1.resId == card2.resId) {
                     card1.state = CardState.PAIRED;
                     card2.state = CardState.PAIRED;
+                    if (isEndGame()) {
+                        dataGame.gameState = GameState.FINISHED;
+                    }
                     if (dataGame.playerTurn == Player.PLAYER_1) {
                         dataGame.scorePlayer1++;
                     } else {
