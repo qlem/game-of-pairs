@@ -15,6 +15,7 @@ import java.util.Random;
 import com.example.qlem.pairsgame.game.Card;
 import com.example.qlem.pairsgame.game.CardState;
 import com.example.qlem.pairsgame.game.DataGame;
+import com.example.qlem.pairsgame.game.GameState;
 import com.example.qlem.pairsgame.game.Player;
 
 
@@ -64,7 +65,7 @@ public class CustomView extends View {
         resList.add(R.drawable.turtle);
     }
 
-    private void distributeCards() {
+    private void fillCardList() {
         Random rand = new Random();
         int randI;
         for (int i = 0; i < 16; i++) {
@@ -81,7 +82,7 @@ public class CustomView extends View {
         card = new Rect();
         dataGame = new DataGame();
         fillResourceList();
-        distributeCards();
+        fillCardList();
         flipping = null;
     }
 
@@ -121,6 +122,16 @@ public class CustomView extends View {
         }
     }
 
+    private boolean isEndGame() {
+        int count = 0;
+        for (int i = 0; i < 16; i++) {
+            if (cards.get(i).state == CardState.PAIRED) {
+                count++;
+            }
+        }
+        return count == 16;
+    }
+
     private Runnable newFlipping = new Runnable() {
         @Override
         public void run() {
@@ -142,6 +153,9 @@ public class CustomView extends View {
                 dataGame.playerTurn = Player.PLAYER_2;
             } else {
                 dataGame.playerTurn = Player.PLAYER_1;
+            }
+            if (isEndGame()) {
+                dataGame.gameState = GameState.FINISHED;
             }
             onDataChangeListener.onDataChangeListener(dataGame.gameState, dataGame.playerTurn,
                     dataGame.scorePlayer1, dataGame.scorePlayer2);
@@ -239,7 +253,7 @@ public class CustomView extends View {
         returnedCards.clear();
         dataGame = new DataGame();
         fillResourceList();
-        distributeCards();
+        fillCardList();
         onDataChangeListener.onDataChangeListener(dataGame.gameState, dataGame.playerTurn,
                 dataGame.scorePlayer1, dataGame.scorePlayer2);
         invalidate();

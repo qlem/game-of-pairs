@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView scorePlayer1View = findViewById(R.id.score_player_1);
         final TextView scorePlayer2View = findViewById(R.id.score_player_2);
         final TextView turnView = findViewById(R.id.player_turn);
+        final TextView winnerView = findViewById(R.id.winner);
 
         final CustomView gameBoard = findViewById(R.id.game_board);
         gameBoard.setOnDataChangeListener(new OnDataChangeListener() {
@@ -28,13 +29,23 @@ public class MainActivity extends AppCompatActivity {
                 String player2ScoreStr = "player 2: " + String.valueOf(player2Score);
                 scorePlayer1View.setText(player1ScoreStr);
                 scorePlayer2View.setText(player2ScoreStr);
-                String turn;
-                if (playerTurn == Player.PLAYER_1) {
-                    turn = "player 1's turn";
-                } else {
-                    turn = "player 2's turn";
+                if (gameState == GameState.RUNNING) {
+                    if (playerTurn == Player.PLAYER_1) {
+                        turnView.setText(R.string.turn_pl1);
+                    } else {
+                        turnView.setText(R.string.turn_pl2);
+                    }
+                } else if (gameState == GameState.FINISHED) {
+                    turnView.setVisibility(View.INVISIBLE);
+                    winnerView.setVisibility(View.VISIBLE);
+                    if (player1Score > player2Score) {
+                        winnerView.setText(R.string.winner_pl1);
+                    } else if (player1Score < player2Score) {
+                        winnerView.setText(R.string.winner_pl2);
+                    } else {
+                        winnerView.setText(R.string.draw);
+                    }
                 }
-                turnView.setText(turn);
             }
         });
 
@@ -42,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                turnView.setVisibility(View.VISIBLE);
+                winnerView.setVisibility(View.INVISIBLE);
                 gameBoard.resetGame();
                 Toast.makeText(MainActivity.this, "New game ready", Toast.LENGTH_SHORT).show();
             }
