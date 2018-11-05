@@ -28,6 +28,7 @@ public class CustomView extends View {
     private Rect card;
     private Card targetedCard;
     private OnDataChangeListener onDataChangeListener;
+    private Runnable flipping;
 
     public CustomView(Context c) {
         super(c);
@@ -63,13 +64,7 @@ public class CustomView extends View {
         resList.add(R.drawable.turtle);
     }
 
-    private void init() {
-        resList = new ArrayList<>();
-        cards = new ArrayList<>();
-        returnedCards = new ArrayList<>();
-        card = new Rect();
-        dataGame = new DataGame();
-        fillResourceList();
+    private void distributeCards() {
         Random rand = new Random();
         int randI;
         for (int i = 0; i < 16; i++) {
@@ -77,6 +72,17 @@ public class CustomView extends View {
             cards.add(new Card(resList.get(randI), i));
             resList.remove(randI);
         }
+    }
+
+    private void init() {
+        resList = new ArrayList<>();
+        cards = new ArrayList<>();
+        returnedCards = new ArrayList<>();
+        card = new Rect();
+        dataGame = new DataGame();
+        fillResourceList();
+        distributeCards();
+        flipping = null;
     }
 
     public void setOnDataChangeListener(OnDataChangeListener onDataChangeListener) {
@@ -115,36 +121,35 @@ public class CustomView extends View {
         }
     }
 
-    private void validateFlipping() {
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Card card1 = returnedCards.get(0);
-                Card card2 = returnedCards.get(1);
-                if (card1.resId == card2.resId) {
-                    card1.state = CardState.PAIRED;
-                    card2.state = CardState.PAIRED;
-                    if (dataGame.playerTurn == Player.PLAYER_1) {
-                        dataGame.scorePlayer1++;
-                    } else {
-                        dataGame.scorePlayer2++;
-                    }
-                } else {
-                    card1.state = CardState.HIDDEN;
-                    card2.state = CardState.HIDDEN;
-                }
+    private Runnable newFlipping = new Runnable() {
+        @Override
+        public void run() {
+            Card card1 = returnedCards.get(0);
+            Card card2 = returnedCards.get(1);
+            if (card1.resId == card2.resId) {
+                card1.state = CardState.PAIRED;
+                card2.state = CardState.PAIRED;
                 if (dataGame.playerTurn == Player.PLAYER_1) {
-                    dataGame.playerTurn = Player.PLAYER_2;
+                    dataGame.scorePlayer1++;
                 } else {
-                    dataGame.playerTurn = Player.PLAYER_1;
+                    dataGame.scorePlayer2++;
                 }
-                onDataChangeListener.onDataChangeListener(dataGame.gameState, dataGame.playerTurn,
-                        dataGame.scorePlayer1, dataGame.scorePlayer2);
-                returnedCards.clear();
-                invalidate();
+            } else {
+                card1.state = CardState.HIDDEN;
+                card2.state = CardState.HIDDEN;
             }
-        }, 1500);
-    }
+            if (dataGame.playerTurn == Player.PLAYER_1) {
+                dataGame.playerTurn = Player.PLAYER_2;
+            } else {
+                dataGame.playerTurn = Player.PLAYER_1;
+            }
+            onDataChangeListener.onDataChangeListener(dataGame.gameState, dataGame.playerTurn,
+                    dataGame.scorePlayer1, dataGame.scorePlayer2);
+            returnedCards.clear();
+            invalidate();
+            flipping = null;
+        }
+    };
 
     private boolean isMovedOutTargetedCard(int cardIndex, float eventX, float eventY) {
         int line = cardIndex / 4;
@@ -195,7 +200,8 @@ public class CustomView extends View {
                 targetedCard.state = CardState.SHOWN;
                 returnedCards.add(targetedCard);
                 if (returnedCards.size() == 2) {
-                    validateFlipping();
+                    flipping = newFlipping;
+                    postDelayed(newFlipping, 1500);
                 }
                 performClick();
                 invalidate();
@@ -224,5 +230,18 @@ public class CustomView extends View {
         }
         GAME_BOARD_CELL_SIZE = gameBoardSize / 4;
         setMeasuredDimension(gameBoardSize, gameBoardSize);
+    }
+
+    public void resetGame() {
+        removeCallbacks(flipping);
+        targetedCard = null;
+        cards.clear();
+        returnedCards.clear();
+        dataGame = new DataGame();
+        fillResourceList();
+        distributeCards();
+        onDataChangeListener.onDataChangeListener(dataGame.gameState, dataGame.playerTurn,
+                dataGame.scorePlayer1, dataGame.scorePlayer2);
+        invalidate();
     }
 }
