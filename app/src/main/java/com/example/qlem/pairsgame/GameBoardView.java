@@ -64,7 +64,7 @@ public class GameBoardView extends View {
     private Card targetedCard;
 
     /**
-     * Stores the game board's data change event listener.
+     * Stores the event listener for the game data changes.
      */
     private OnDataChangeListener onDataChangeListener;
 
@@ -348,8 +348,8 @@ public class GameBoardView extends View {
     }
 
     /**
-     * Function that assigns to the data change listener variable, the passed object.
-     * @param onDataChangeListener on data change listener transmitted by the main activity.
+     * This function initializes the data changes event listener.
+     * @param onDataChangeListener listener transmitted by the main activity.
      */
     public void setOnDataChangeListener(OnDataChangeListener onDataChangeListener) {
         this.onDataChangeListener = onDataChangeListener;
