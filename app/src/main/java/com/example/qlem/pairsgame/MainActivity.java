@@ -72,8 +72,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Function called at the creation of the main activity, initializes the game
-     * board's data change listener for refresh the UI and the restart button.
+     * Function called at the creation of the main activity, initializes variables, game
+     * board's data change listener for refresh the UI and restart button.
      * @param savedInstanceState saved instance state object
      */
     @Override

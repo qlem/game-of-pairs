@@ -154,14 +154,6 @@ public class GameBoardView extends View {
     }
 
     /**
-     * Function that assigns to the data change listener, the passed object.
-     * @param onDataChangeListener on data change listener transmitted by the main activity.
-     */
-    public void setOnDataChangeListener(OnDataChangeListener onDataChangeListener) {
-        this.onDataChangeListener = onDataChangeListener;
-    }
-
-    /**
      * Function called to draw the cards in the view.
      * @param canvas canvas corresponds to the drawing area
      */
@@ -354,6 +346,14 @@ public class GameBoardView extends View {
         }
         GAME_BOARD_CELL_SIZE = gameBoardSize / 4;
         setMeasuredDimension(gameBoardSize, gameBoardSize);
+    }
+
+    /**
+     * Function that assigns to the data change listener variable, the passed object.
+     * @param onDataChangeListener on data change listener transmitted by the main activity.
+     */
+    public void setOnDataChangeListener(OnDataChangeListener onDataChangeListener) {
+        this.onDataChangeListener = onDataChangeListener;
     }
 
     /**

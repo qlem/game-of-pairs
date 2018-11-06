@@ -6,7 +6,7 @@ package com.example.qlem.pairsgame.game;
 public class gameData {
 
     /**
-     * The player's turn, indicates the expected player to play. PLAYER 1 / PLAYER 2
+     * The player's turn, indicates the expected player to play: PLAYER 1 / PLAYER 2.
      */
     public Player playerTurn;
 
