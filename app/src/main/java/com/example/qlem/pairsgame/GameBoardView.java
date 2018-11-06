@@ -293,14 +293,13 @@ public class GameBoardView extends View {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 targetedCard = getTargetedCard(eventX, eventY);
-                if (targetedCard.state != CardState.HIDDEN) {
+                if (targetedCard.state != CardState.HIDDEN || returnedCards.size() == 2) {
                     targetedCard = null;
                     return false;
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                if (targetedCard == null || returnedCards.size() == 2) {
-                    targetedCard = null;
+                if (targetedCard == null) {
                     return false;
                 }
                 Card targetedCardUp = getTargetedCard(eventX, eventY);
