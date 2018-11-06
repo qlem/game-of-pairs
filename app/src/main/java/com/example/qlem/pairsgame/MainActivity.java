@@ -10,7 +10,16 @@ import android.widget.Toast;
 import com.example.qlem.pairsgame.game.GameState;
 import com.example.qlem.pairsgame.game.Player;
 
+/**
+ * This class is the main activity that displays the game board view and refreshes UI's data.
+ */
 public class MainActivity extends AppCompatActivity {
+
+    /**
+     * Function called at the creation of the main activity, initializes the game
+     * board's data change listener for refresh the UI's data and the restart button.
+     * @param savedInstanceState saved instance state object
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView turnView = findViewById(R.id.player_turn);
         final TextView winnerView = findViewById(R.id.winner);
 
-        final CustomView gameBoard = findViewById(R.id.game_board);
+        final GameBoardView gameBoard = findViewById(R.id.game_board);
         gameBoard.setOnDataChangeListener(new OnDataChangeListener() {
             @Override
             public void onDataChangeListener(GameState gameState, Player playerTurn, int player1Score, int player2Score) {

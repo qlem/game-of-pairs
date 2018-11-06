@@ -14,39 +14,98 @@ import java.util.Random;
 
 import com.example.qlem.pairsgame.game.Card;
 import com.example.qlem.pairsgame.game.CardState;
-import com.example.qlem.pairsgame.game.DataGame;
+import com.example.qlem.pairsgame.game.gameData;
 import com.example.qlem.pairsgame.game.GameState;
 import com.example.qlem.pairsgame.game.Player;
 
+/**
+ * Class that defines the custom view of the game board.
+ */
+public class GameBoardView extends View {
 
-public class CustomView extends View {
-
+    /**
+     * Variable that stores the number of cards.
+     */
     private int NB_CARD = 16;
+
+    /**
+     * Variable that stores the cell's size of the game board.
+     */
     private int GAME_BOARD_CELL_SIZE = 0;
+
+    /**
+     * List that stores two times the id of each resource (animal pictures).
+     */
     private List<Integer> resList;
+
+    /**
+     * List of the cards.
+     */
     private List<Card> cards;
+
+    /**
+     * List that stores the returned cards (maximum two cards).
+     */
     private List<Card> returnedCards;
-    private DataGame dataGame;
+
+    /**
+     * Variable that stored the game's data object.
+     */
+    private gameData gameData;
+
+    /**
+     * The rectangle (graphic shape) used to draw one card.
+     */
     private Rect card;
+
+    /**
+     * Card that is targeted by the user input.
+     */
     private Card targetedCard;
+
+    /**
+     * Stores the game board's data change event listener.
+     */
     private OnDataChangeListener onDataChangeListener;
+
+    /**
+     * Stores the thread that performs the flipping of two card.
+     */
     private Runnable flipping;
 
-    public CustomView(Context c) {
+    /**
+     * Constructor of the game board view class.
+     * @param c context
+     */
+    public GameBoardView(Context c) {
         super(c);
         init();
     }
 
-    public CustomView(Context c, AttributeSet as) {
+    /**
+     * Constructor of the game board view class.
+     * @param c context
+     * @param as attribute set
+     */
+    public GameBoardView(Context c, AttributeSet as) {
         super(c, as);
         init();
     }
 
-    public CustomView(Context c, AttributeSet as, int default_style) {
+    /**
+     * Constructor of the game board view class.
+     * @param c context
+     * @param as attribute set
+     * @param default_style default style
+     */
+    public GameBoardView(Context c, AttributeSet as, int default_style) {
         super(c, as, default_style);
         init();
     }
 
+    /**
+     * Function that fills the resource list by adding two times each picture id of each animal.
+     */
     private void fillResourceList() {
         resList.add(R.drawable.chicken);
         resList.add(R.drawable.chicken);
@@ -66,6 +125,10 @@ public class CustomView extends View {
         resList.add(R.drawable.turtle);
     }
 
+    /**
+     * Function that fills the card list. Creates one card for each item picked up randomly
+     * in the resource list.
+     */
     private void fillCardList() {
         Random rand = new Random();
         int randI;
@@ -76,21 +139,32 @@ public class CustomView extends View {
         }
     }
 
+    /**
+     * Function that initializes all variables used by the game board view.
+     */
     private void init() {
         resList = new ArrayList<>();
         cards = new ArrayList<>();
         returnedCards = new ArrayList<>();
         card = new Rect();
-        dataGame = new DataGame();
+        gameData = new gameData();
         fillResourceList();
         fillCardList();
         flipping = null;
     }
 
+    /**
+     * Function that assigns to the data change listener, the passed object.
+     * @param onDataChangeListener on data change listener transmitted by the main activity.
+     */
     public void setOnDataChangeListener(OnDataChangeListener onDataChangeListener) {
         this.onDataChangeListener = onDataChangeListener;
     }
 
+    /**
+     * Function called to draw the cards in the view.
+     * @param canvas canvas corresponds to the drawing area
+     */
     @Override
     protected void onDraw(Canvas canvas) {
         card.set(-GAME_BOARD_CELL_SIZE / 2 + 10, -GAME_BOARD_CELL_SIZE / 2 + 10,
@@ -123,6 +197,10 @@ public class CustomView extends View {
         }
     }
 
+    /**
+     * Function that returns true if the end game have been reached or false.
+     * @return TRUE / FALSE
+     */
     private boolean isEndGame() {
         int count = 0;
         for (int i = 0; i < NB_CARD; i++) {
@@ -133,6 +211,10 @@ public class CustomView extends View {
         return count == NB_CARD;
     }
 
+    /**
+     * Thread that performs the flipping of two cards and proceeds to some actions
+     * according to the game logic.
+     */
     private Runnable newFlipping = new Runnable() {
         @Override
         public void run() {
@@ -141,31 +223,38 @@ public class CustomView extends View {
             if (card1.resId == card2.resId) {
                 card1.state = CardState.PAIRED;
                 card2.state = CardState.PAIRED;
-                if (dataGame.playerTurn == Player.PLAYER_1) {
-                    dataGame.scorePlayer1++;
+                if (gameData.playerTurn == Player.PLAYER_1) {
+                    gameData.scorePlayer1++;
                 } else {
-                    dataGame.scorePlayer2++;
+                    gameData.scorePlayer2++;
                 }
             } else {
                 card1.state = CardState.HIDDEN;
                 card2.state = CardState.HIDDEN;
             }
-            if (dataGame.playerTurn == Player.PLAYER_1) {
-                dataGame.playerTurn = Player.PLAYER_2;
+            if (gameData.playerTurn == Player.PLAYER_1) {
+                gameData.playerTurn = Player.PLAYER_2;
             } else {
-                dataGame.playerTurn = Player.PLAYER_1;
+                gameData.playerTurn = Player.PLAYER_1;
             }
             if (isEndGame()) {
-                dataGame.gameState = GameState.FINISHED;
+                gameData.gameState = GameState.FINISHED;
             }
-            onDataChangeListener.onDataChangeListener(dataGame.gameState, dataGame.playerTurn,
-                    dataGame.scorePlayer1, dataGame.scorePlayer2);
+            onDataChangeListener.onDataChangeListener(gameData.gameState, gameData.playerTurn,
+                    gameData.scorePlayer1, gameData.scorePlayer2);
             returnedCards.clear();
             invalidate();
             flipping = null;
         }
     };
 
+    /**
+     * Function that return true if the user touches a card and moves out the card area or false.
+     * @param cardIndex card index in the list
+     * @param eventX coordinate X of the move event
+     * @param eventY coordinate Y of the move event
+     * @return TRUE / FALSE
+     */
     private boolean isMovedOutTargetedCard(int cardIndex, float eventX, float eventY) {
         int line = cardIndex / 4;
         int column = - line * 4 + cardIndex;
@@ -176,6 +265,12 @@ public class CustomView extends View {
         return eventX <= fromX || eventX >= toX || eventY <= fromY || eventY >= toY;
     }
 
+    /**
+     * Function that return the targeted card by the user.
+     * @param eventX coordinate X of the touch event
+     * @param eventY coordinate Y of the touch event
+     * @return targeted card
+     */
     private Card getTargetedCard(float eventX, float eventY) {
         int column = Math.round(eventX) / GAME_BOARD_CELL_SIZE;
         int line = Math.round(eventY) / GAME_BOARD_CELL_SIZE;
@@ -183,12 +278,22 @@ public class CustomView extends View {
         return cards.get(index);
     }
 
+    /**
+     * Function that indicates the system to perform a click.
+     * @return TRUE
+     */
     @Override
     public boolean performClick() {
         super.performClick();
         return true;
     }
 
+    /**
+     * Function called when the user touches the game board view, performs some actions
+     * according to the game logic and the event type (down, up or move action).
+     * @param event the event object
+     * @return TRUE / FALSE
+     */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float eventX = event.getX();
@@ -232,6 +337,11 @@ public class CustomView extends View {
         return true;
     }
 
+    /**
+     * Function that initializes the width and the height of the game board view.
+     * @param widthMeasureSpec width of the screen
+     * @param heightMeasureSpec height of the screen
+     */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int width = MeasureSpec.getSize(widthMeasureSpec);
@@ -246,16 +356,19 @@ public class CustomView extends View {
         setMeasuredDimension(gameBoardSize, gameBoardSize);
     }
 
+    /**
+     * Function that resets all game's data for start a new game.
+     */
     public void resetGame() {
         removeCallbacks(flipping);
         targetedCard = null;
         cards.clear();
         returnedCards.clear();
-        dataGame = new DataGame();
+        gameData = new gameData();
         fillResourceList();
         fillCardList();
-        onDataChangeListener.onDataChangeListener(dataGame.gameState, dataGame.playerTurn,
-                dataGame.scorePlayer1, dataGame.scorePlayer2);
+        onDataChangeListener.onDataChangeListener(gameData.gameState, gameData.playerTurn,
+                gameData.scorePlayer1, gameData.scorePlayer2);
         invalidate();
     }
 }
