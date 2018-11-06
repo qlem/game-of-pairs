@@ -21,6 +21,7 @@ import com.example.qlem.pairsgame.game.Player;
 
 public class CustomView extends View {
 
+    private int NB_CARD = 16;
     private int GAME_BOARD_CELL_SIZE = 0;
     private List<Integer> resList;
     private List<Card> cards;
@@ -68,7 +69,7 @@ public class CustomView extends View {
     private void fillCardList() {
         Random rand = new Random();
         int randI;
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < NB_CARD; i++) {
             randI = rand.nextInt(resList.size());
             cards.add(new Card(resList.get(randI), i));
             resList.remove(randI);
@@ -96,7 +97,7 @@ public class CustomView extends View {
                 GAME_BOARD_CELL_SIZE / 2 - 10, GAME_BOARD_CELL_SIZE / 2 - 10);
         int x;
         int y;
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < NB_CARD; i++) {
             int line = i / 4;
             int column = - line * 4 + i;
             x = (GAME_BOARD_CELL_SIZE * column) + (GAME_BOARD_CELL_SIZE / 2);
@@ -124,12 +125,12 @@ public class CustomView extends View {
 
     private boolean isEndGame() {
         int count = 0;
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < NB_CARD; i++) {
             if (cards.get(i).state == CardState.PAIRED) {
                 count++;
             }
         }
-        return count == 16;
+        return count == NB_CARD;
     }
 
     private Runnable newFlipping = new Runnable() {
@@ -195,8 +196,7 @@ public class CustomView extends View {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 targetedCard = getTargetedCard(eventX, eventY);
-                if (targetedCard.state == CardState.PAIRED || (returnedCards.size() == 1 &&
-                        targetedCard == returnedCards.get(0))) {
+                if (targetedCard.state != CardState.HIDDEN) {
                     targetedCard = null;
                     return false;
                 }
@@ -215,7 +215,7 @@ public class CustomView extends View {
                 returnedCards.add(targetedCard);
                 if (returnedCards.size() == 2) {
                     flipping = newFlipping;
-                    postDelayed(newFlipping, 1500);
+                    postDelayed(flipping, 1500);
                 }
                 performClick();
                 invalidate();
