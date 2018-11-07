@@ -54,7 +54,7 @@ public class GameBoardView extends View {
     private gameData gameData;
 
     /**
-     * The rectangle (graphic shape) used to draw one card.
+     * The rectangle (graphic shape) used to draw a card.
      */
     private Rect card;
 
@@ -155,35 +155,47 @@ public class GameBoardView extends View {
 
     /**
      * Function called to draw the cards in the view.
-     * @param canvas canvas corresponds to the drawing area
+     * @param canvas corresponds to the drawing area
      */
     @Override
     protected void onDraw(Canvas canvas) {
-        card.set(-GAME_BOARD_CELL_SIZE / 2 + 10, -GAME_BOARD_CELL_SIZE / 2 + 10,
-                GAME_BOARD_CELL_SIZE / 2 - 10, GAME_BOARD_CELL_SIZE / 2 - 10);
         int x;
         int y;
+        Drawable drawable;
+        Context c = getContext();
+        int offset = (int)(GAME_BOARD_CELL_SIZE * 0.92) / 2;
+        int contentOffset = (int)(GAME_BOARD_CELL_SIZE * 0.7) / 2;
         for (int i = 0; i < NB_CARD; i++) {
             int line = i / 4;
             int column = - line * 4 + i;
             x = (GAME_BOARD_CELL_SIZE * column) + (GAME_BOARD_CELL_SIZE / 2);
             y = (GAME_BOARD_CELL_SIZE * line) + (GAME_BOARD_CELL_SIZE / 2);
+            card.set(-offset, -offset, offset, offset);
             canvas.save();
             canvas.translate(x, y);
-            Drawable drawable;
-            Context c = getContext();
-            if (cards.get(i).state == CardState.HIDDEN) {
-                drawable = c.getDrawable(R.drawable.back_card);
-                if (drawable != null) {
-                    drawable.setBounds(card);
-                    drawable.draw(canvas);
-                }
-            } else if (cards.get(i).state == CardState.SHOWN) {
-                drawable = c.getDrawable(cards.get(i).resId);
-                if (drawable != null) {
-                    drawable.setBounds(card);
-                    drawable.draw(canvas);
-                }
+            switch (cards.get(i).state) {
+                case HIDDEN:
+                    drawable = c.getDrawable(R.drawable.card_face_down);
+                    if (drawable != null) {
+                        drawable.setBounds(card);
+                        drawable.draw(canvas);
+                    }
+                    break;
+                case SHOWN:
+                    drawable = c.getDrawable(R.drawable.card_face_up);
+                    if (drawable != null) {
+                        drawable.setBounds(card);
+                        drawable.draw(canvas);
+                    }
+                    card.set(-contentOffset, -contentOffset, contentOffset, contentOffset);
+                    drawable = c.getDrawable(cards.get(i).resId);
+                    if (drawable != null) {
+                        drawable.setBounds(card);
+                        drawable.draw(canvas);
+                    }
+                    break;
+                default:
+                    break;
             }
             canvas.restore();
         }
