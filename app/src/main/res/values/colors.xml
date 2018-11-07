@@ -5,6 +5,6 @@
     <color name="colorAccent">#D81B60</color>
     <color name="colorText">#000000</color>
     <color name="backgroundColor">#828282</color>
-    <color name="cardFaceUpColor">#8c9bf7</color>
-    <color name="cardFaceDownColor">#444fed</color>
+    <color name="cream">#fce3cf</color>
+    <color name="blue">#444fed</color>
 </resources>

@@ -6,9 +6,6 @@
         android:topRightRadius="5dp"
         android:bottomRightRadius="5dp"
         android:bottomLeftRadius="5dp" />
-    <stroke
-        android:width="3dp"
-        android:color="@android:color/white" />
     <solid
-        android:color="@color/cardFaceUpColor"/>
+        android:color="@color/cream"/>
 </shape>
