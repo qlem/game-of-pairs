@@ -3,7 +3,7 @@ package com.example.qlem.pairsgame.game;
 /**
  * Class that stores the game's data.
  */
-public class gameData {
+public class GameData {
 
     /**
      * The player's turn, indicates the expected player to play: PLAYER 1 / PLAYER 2.
@@ -28,7 +28,7 @@ public class gameData {
     /**
      *  Constructor of the game's data class, initializes a new object.
      */
-    public gameData() {
+    public GameData() {
         this.playerTurn = Player.PLAYER_1;
         this.scorePlayer1 = 0;
         this.scorePlayer2 = 0;
