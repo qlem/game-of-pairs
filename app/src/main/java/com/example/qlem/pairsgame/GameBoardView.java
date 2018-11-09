@@ -35,7 +35,7 @@ public class GameBoardView extends View {
     private int GAME_BOARD_CELL_SIZE = 0;
 
     /**
-     * List that stores two times the id of each resource (animal pictures).
+     * List that stores the id of the available resources (animal pictures).
      */
     private List<Integer> resList;
 
