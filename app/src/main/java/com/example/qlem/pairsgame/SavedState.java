@@ -5,9 +5,7 @@ import android.os.Parcelable;
 import android.view.View;
 
 import com.example.qlem.pairsgame.game.Card;
-import com.example.qlem.pairsgame.game.GameState;
-import com.example.qlem.pairsgame.game.Player;
-
+import com.example.qlem.pairsgame.game.GameData;
 import java.util.List;
 
 /**
@@ -26,24 +24,9 @@ public class SavedState extends View.BaseSavedState {
     List<Card> returnedCards;
 
     /**
-     * The current player's turn.
+     * The class that gives some information about the current game.
      */
-    Player playerTurn;
-
-    /**
-     * The current value of the player 1's score.
-     */
-    int scorePlayer1;
-
-    /**
-     * The current value of the player 2's score.
-     */
-    int scorePlayer2;
-
-    /**
-     * The current state of the game.
-     */
-    GameState gameState;
+    GameData gameData;
 
     /**
      * Constructor of the class, used while restoring.
@@ -71,10 +54,7 @@ public class SavedState extends View.BaseSavedState {
         super.writeToParcel(out, flags);
         out.writeList(cards);
         out.writeList(returnedCards);
-        out.writeString(playerTurn.name());
-        out.writeInt(scorePlayer1);
-        out.writeInt(scorePlayer2);
-        out.writeString(gameState.name());
+        out.writeParcelable(gameData, 0);
     }
 
     /**

@@ -1,9 +1,12 @@
 package com.example.qlem.pairsgame.game;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Class that stores the game's data.
  */
-public class GameData {
+public class GameData implements Parcelable {
 
     /**
      * The player's turn, indicates the expected player to play: PLAYER 1 / PLAYER 2.
@@ -33,5 +36,33 @@ public class GameData {
         this.scorePlayer1 = 0;
         this.scorePlayer2 = 0;
         this.gameState = GameState.RUNNING;
+    }
+
+    private GameData(Parcel in) {
+        scorePlayer1 = in.readInt();
+        scorePlayer2 = in.readInt();
+    }
+
+    public static final Creator<GameData> CREATOR = new Creator<GameData>() {
+        @Override
+        public GameData createFromParcel(Parcel in) {
+            return new GameData(in);
+        }
+
+        @Override
+        public GameData[] newArray(int size) {
+            return new GameData[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(scorePlayer1);
+        dest.writeInt(scorePlayer2);
     }
 }

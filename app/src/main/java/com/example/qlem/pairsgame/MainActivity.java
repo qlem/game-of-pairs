@@ -2,11 +2,13 @@ package com.example.qlem.pairsgame;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.qlem.pairsgame.game.GameData;
 import com.example.qlem.pairsgame.game.GameState;
 import com.example.qlem.pairsgame.game.Player;
 
@@ -14,6 +16,11 @@ import com.example.qlem.pairsgame.game.Player;
  * This class defines the main activity that displays the game board view and refreshes the UI.
  */
 public class MainActivity extends AppCompatActivity {
+
+    private Player playerTurn;
+    private int scorePl1;
+    private int scorePl2;
+    private GameState gameState;
 
     /**
      * Variable that stores the game board view.
@@ -42,14 +49,10 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Function that refreshes the UI.
-     * @param gameState the game state
-     * @param playerTurn the player's turn
-     * @param player1Score the score of player 1
-     * @param player2Score the score of player 2
      */
-    private void refreshUI(GameState gameState, Player playerTurn, int player1Score, int player2Score) {
-        String player1ScoreStr = "player 1: " + String.valueOf(player1Score);
-        String player2ScoreStr = "player 2: " + String.valueOf(player2Score);
+    private void refreshUI() {
+        String player1ScoreStr = "player 1: " + String.valueOf(scorePl1);
+        String player2ScoreStr = "player 2: " + String.valueOf(scorePl2);
         scorePlayer1View.setText(player1ScoreStr);
         scorePlayer2View.setText(player2ScoreStr);
         if (gameState == GameState.RUNNING) {
@@ -61,9 +64,9 @@ public class MainActivity extends AppCompatActivity {
         } else if (gameState == GameState.FINISHED) {
             turnView.setVisibility(View.INVISIBLE);
             winnerView.setVisibility(View.VISIBLE);
-            if (player1Score > player2Score) {
+            if (scorePl1 > scorePl2) {
                 winnerView.setText(R.string.winner_pl1);
-            } else if (player1Score < player2Score) {
+            } else if (scorePl1 < scorePl2) {
                 winnerView.setText(R.string.winner_pl2);
             } else {
                 winnerView.setText(R.string.draw);
@@ -81,6 +84,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Log.i("DEBUG", "CREATE");
+
+        playerTurn = Player.PLAYER_1;
+        scorePl1 = 0;
+        scorePl2 = 0;
+        gameState = GameState.RUNNING;
+
         gameBoardView = findViewById(R.id.game_board);
         scorePlayer1View = findViewById(R.id.score_player_1);
         scorePlayer2View = findViewById(R.id.score_player_2);
@@ -89,8 +99,12 @@ public class MainActivity extends AppCompatActivity {
 
         gameBoardView.setOnDataChangeListener(new OnDataChangeListener() {
             @Override
-            public void onDataChangeListener(GameState gameState, Player playerTurn, int player1Score, int player2Score) {
-                refreshUI(gameState, playerTurn, player1Score, player2Score);
+            public void onDataChangeListener(GameData gameData) {
+                MainActivity.this.gameState = gameData.gameState;
+                MainActivity.this.playerTurn = gameData.playerTurn;
+                MainActivity.this.scorePl1 = gameData.scorePlayer1;
+                MainActivity.this.scorePl2 = gameData.scorePlayer2;
+                refreshUI();
             }
         });
 
@@ -104,5 +118,26 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "New game ready", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle savedInstanceState) {
+        Log.i("DEBUG", "SAVE MAIN ACTIVITY");
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putString("turn", playerTurn.name());
+        savedInstanceState.putInt("scorePl1", scorePl1);
+        savedInstanceState.putInt("scorePl2", scorePl2);
+        savedInstanceState.putString("gameState", gameState.name());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        Log.i("DEBUG", "RESTORE MAIN ACTIVITY");
+        super.onRestoreInstanceState(savedInstanceState);
+        playerTurn = Player.valueOf(savedInstanceState.getString("turn"));
+        scorePl1 = savedInstanceState.getInt("scorePl1");
+        scorePl2 = savedInstanceState.getInt("scorePl2");
+        gameState = GameState.valueOf(savedInstanceState.getString("gameState"));
+        refreshUI();
     }
 }

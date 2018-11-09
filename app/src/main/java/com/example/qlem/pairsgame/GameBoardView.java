@@ -6,6 +6,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -144,6 +145,7 @@ public class GameBoardView extends View {
      * Function that initializes all variables used by the game board view.
      */
     private void init() {
+        Log.i("DEBUG", "INIT");
         resList = new ArrayList<>();
         cards = new ArrayList<>();
         returnedCards = new ArrayList<>();
@@ -245,8 +247,7 @@ public class GameBoardView extends View {
             if (isEndGame()) {
                 gameData.gameState = GameState.FINISHED;
             }
-            onDataChangeListener.onDataChangeListener(gameData.gameState, gameData.playerTurn,
-                    gameData.scorePlayer1, gameData.scorePlayer2);
+            onDataChangeListener.onDataChangeListener(gameData);
             returnedCards.clear();
             invalidate();
             flipping = null;
@@ -361,29 +362,28 @@ public class GameBoardView extends View {
     }
 
     /**
-     * This function saves the state of the view before screen orientation changes.
+     * This function saves the state of the view.
      * @return object that contains the current values of the view
      */
     @Override
     public Parcelable onSaveInstanceState() {
+        Log.i("DEBUG", "SAVE GAME BOARD");
         removeCallbacks(flipping);
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
         ss.cards = cards;
         ss.returnedCards = returnedCards;
-        ss.playerTurn = gameData.playerTurn;
-        ss.scorePlayer1 = gameData.scorePlayer1;
-        ss.scorePlayer2 = gameData.scorePlayer2;
-        ss.gameState = gameData.gameState;
+        ss.gameData = gameData;
         return ss;
     }
 
     /**
-     * This function restores the state of the view after screen orientation changes.
+     * This function restores the state of the view.
      * @param state object that contains the values of the view to be restored
      */
     @Override
     public void onRestoreInstanceState(Parcelable state) {
+        Log.i("DEBUG", "RESTORE GAME BOARD");
         if(!(state instanceof SavedState)) {
             super.onRestoreInstanceState(state);
             return;
@@ -392,16 +392,16 @@ public class GameBoardView extends View {
         super.onRestoreInstanceState(ss.getSuperState());
         cards = ss.cards;
         returnedCards = ss.returnedCards;
-        gameData.playerTurn = Player.valueOf(ss.playerTurn.toString());
-        gameData.scorePlayer1 = ss.scorePlayer1;
-        gameData.scorePlayer2 = ss.scorePlayer2;
-        gameData.gameState = GameState.valueOf(ss.gameState.toString());
-        if (returnedCards.size() == 2) {
+        gameData = ss.gameData;
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        Log.i("DEBUG", "FOCUS :" + String.valueOf(hasWindowFocus));
+        if (hasWindowFocus && returnedCards.size() == 2) {
             flipping = newFlipping;
             postDelayed(flipping, 1500);
         }
-        onDataChangeListener.onDataChangeListener(gameData.gameState, gameData.playerTurn,
-                gameData.scorePlayer1, gameData.scorePlayer2);
     }
 
     /**
@@ -423,8 +423,7 @@ public class GameBoardView extends View {
         gameData = new GameData();
         fillResourceList();
         fillCardList();
-        onDataChangeListener.onDataChangeListener(gameData.gameState, gameData.playerTurn,
-                gameData.scorePlayer1, gameData.scorePlayer2);
+        onDataChangeListener.onDataChangeListener(gameData);
         invalidate();
     }
 }
