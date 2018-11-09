@@ -2,7 +2,6 @@ package com.example.qlem.pairsgame;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -17,9 +16,24 @@ import com.example.qlem.pairsgame.game.Player;
  */
 public class MainActivity extends AppCompatActivity {
 
+    /**
+     * This variable contains the player turn.
+     */
     private Player playerTurn;
+
+    /**
+     * This variable contains the score of the player 1.
+     */
     private int scorePl1;
+
+    /**
+     * This variable contains the score of the player 2.
+     */
     private int scorePl2;
+
+    /**
+     * This variable contains the state of the current game.
+     */
     private GameState gameState;
 
     /**
@@ -84,13 +98,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.i("DEBUG", "CREATE");
-
         playerTurn = Player.PLAYER_1;
         scorePl1 = 0;
         scorePl2 = 0;
         gameState = GameState.RUNNING;
-
         gameBoardView = findViewById(R.id.game_board);
         scorePlayer1View = findViewById(R.id.score_player_1);
         scorePlayer2View = findViewById(R.id.score_player_2);
@@ -120,9 +131,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * This function saves the state of the main activity.
+     * @param savedInstanceState represents the current state
+     */
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
-        Log.i("DEBUG", "SAVE MAIN ACTIVITY");
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putString("turn", playerTurn.name());
         savedInstanceState.putInt("scorePl1", scorePl1);
@@ -130,9 +144,12 @@ public class MainActivity extends AppCompatActivity {
         savedInstanceState.putString("gameState", gameState.name());
     }
 
+    /**
+     * This function restores the state of the main activity.
+     * @param savedInstanceState represents the state to be restored
+     */
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        Log.i("DEBUG", "RESTORE MAIN ACTIVITY");
         super.onRestoreInstanceState(savedInstanceState);
         playerTurn = Player.valueOf(savedInstanceState.getString("turn"));
         scorePl1 = savedInstanceState.getInt("scorePl1");

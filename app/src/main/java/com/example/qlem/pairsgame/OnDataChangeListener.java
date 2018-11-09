@@ -9,7 +9,7 @@ public interface OnDataChangeListener {
 
     /**
      * This function is the event listener for the game board data changes.
-     * @param gameData class that provides information about the current game
+     * @param gameData provides information about the current game
      */
     void onDataChangeListener(GameData gameData);
 }

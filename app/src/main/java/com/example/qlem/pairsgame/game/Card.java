@@ -34,6 +34,8 @@ public class Card implements Parcelable {
         this.position = position;
     }
 
+    // TODO add headers for parcelable implementation
+
     private Card(Parcel in) {
         resId = in.readInt();
         position = in.readInt();

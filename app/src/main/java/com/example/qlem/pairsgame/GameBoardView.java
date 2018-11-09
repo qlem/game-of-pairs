@@ -6,7 +6,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -51,7 +50,7 @@ public class GameBoardView extends View {
     private List<Card> returnedCards;
 
     /**
-     * Variable that stored the game's data object.
+     * Variable that stored information about the game.
      */
     private GameData gameData;
 
@@ -145,7 +144,6 @@ public class GameBoardView extends View {
      * Function that initializes all variables used by the game board view.
      */
     private void init() {
-        Log.i("DEBUG", "INIT");
         resList = new ArrayList<>();
         cards = new ArrayList<>();
         returnedCards = new ArrayList<>();
@@ -363,11 +361,10 @@ public class GameBoardView extends View {
 
     /**
      * This function saves the state of the view.
-     * @return object that contains the current values of the view
+     * @return a parcelable that represents the state
      */
     @Override
     public Parcelable onSaveInstanceState() {
-        Log.i("DEBUG", "SAVE GAME BOARD");
         removeCallbacks(flipping);
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
@@ -379,11 +376,10 @@ public class GameBoardView extends View {
 
     /**
      * This function restores the state of the view.
-     * @param state object that contains the values of the view to be restored
+     * @param state the state to be restored
      */
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-        Log.i("DEBUG", "RESTORE GAME BOARD");
         if(!(state instanceof SavedState)) {
             super.onRestoreInstanceState(state);
             return;
@@ -395,9 +391,12 @@ public class GameBoardView extends View {
         gameData = ss.gameData;
     }
 
+    /**
+     * This function is called when the window lose or gains focus.
+     * @param hasWindowFocus true if gains focus or false if lose focus
+     */
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
-        Log.i("DEBUG", "FOCUS :" + String.valueOf(hasWindowFocus));
         if (hasWindowFocus && returnedCards.size() == 2) {
             flipping = newFlipping;
             postDelayed(flipping, 1500);

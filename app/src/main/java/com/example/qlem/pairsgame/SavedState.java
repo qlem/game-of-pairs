@@ -24,7 +24,7 @@ public class SavedState extends View.BaseSavedState {
     List<Card> returnedCards;
 
     /**
-     * The class that gives some information about the current game.
+     * The current information about the game.
      */
     GameData gameData;
 
@@ -54,7 +54,7 @@ public class SavedState extends View.BaseSavedState {
         super.writeToParcel(out, flags);
         out.writeList(cards);
         out.writeList(returnedCards);
-        out.writeParcelable(gameData, 0);
+        out.writeParcelable(gameData, flags);
     }
 
     /**

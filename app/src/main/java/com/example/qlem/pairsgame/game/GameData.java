@@ -38,6 +38,8 @@ public class GameData implements Parcelable {
         this.gameState = GameState.RUNNING;
     }
 
+    // TODO add headers for parcelable implementation
+
     private GameData(Parcel in) {
         scorePlayer1 = in.readInt();
         scorePlayer2 = in.readInt();
