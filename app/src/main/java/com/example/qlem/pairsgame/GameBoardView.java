@@ -47,7 +47,7 @@ public class GameBoardView extends View {
     /**
      * List that stores the returned cards (maximum two cards).
      */
-    private List<Card> returnedCards;
+    private List<Card> cardsFaceUp;
 
     /**
      * Variable that stored information about the game.
@@ -146,7 +146,7 @@ public class GameBoardView extends View {
     private void init() {
         resList = new ArrayList<>();
         cards = new ArrayList<>();
-        returnedCards = new ArrayList<>();
+        cardsFaceUp = new ArrayList<>();
         card = new Rect();
         gameData = new GameData();
         fillResourceList();
@@ -223,8 +223,8 @@ public class GameBoardView extends View {
     private Runnable newFlipping = new Runnable() {
         @Override
         public void run() {
-            Card card1 = returnedCards.get(0);
-            Card card2 = returnedCards.get(1);
+            Card card1 = cardsFaceUp.get(0);
+            Card card2 = cardsFaceUp.get(1);
             if (card1.resId == card2.resId) {
                 card1.state = CardState.PAIRED;
                 card2.state = CardState.PAIRED;
@@ -246,7 +246,7 @@ public class GameBoardView extends View {
                 gameData.gameState = GameState.FINISHED;
             }
             onDataChangeListener.onDataChangeListener(gameData);
-            returnedCards.clear();
+            cardsFaceUp.clear();
             invalidate();
             flipping = null;
         }
@@ -305,7 +305,7 @@ public class GameBoardView extends View {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 targetedCard = getTargetedCard(eventX, eventY);
-                if (targetedCard.state != CardState.HIDDEN || returnedCards.size() == 2) {
+                if (targetedCard.state != CardState.HIDDEN || cardsFaceUp.size() == 2) {
                     targetedCard = null;
                     return false;
                 }
@@ -320,8 +320,8 @@ public class GameBoardView extends View {
                     return false;
                 }
                 targetedCard.state = CardState.SHOWN;
-                returnedCards.add(targetedCard);
-                if (returnedCards.size() == 2) {
+                cardsFaceUp.add(targetedCard);
+                if (cardsFaceUp.size() == 2) {
                     flipping = newFlipping;
                     postDelayed(flipping, 1500);
                 }
@@ -369,7 +369,7 @@ public class GameBoardView extends View {
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
         ss.cards = cards;
-        ss.returnedCards = returnedCards;
+        ss.cardsFaceUp = cardsFaceUp;
         ss.gameData = gameData;
         return ss;
     }
@@ -387,7 +387,7 @@ public class GameBoardView extends View {
         SavedState ss = (SavedState)state;
         super.onRestoreInstanceState(ss.getSuperState());
         cards = ss.cards;
-        returnedCards = ss.returnedCards;
+        cardsFaceUp = ss.cardsFaceUp;
         gameData = ss.gameData;
     }
 
@@ -397,7 +397,7 @@ public class GameBoardView extends View {
      */
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
-        if (hasWindowFocus && returnedCards.size() == 2) {
+        if (hasWindowFocus && cardsFaceUp.size() == 2) {
             flipping = newFlipping;
             postDelayed(flipping, 1500);
         }
@@ -418,7 +418,7 @@ public class GameBoardView extends View {
         removeCallbacks(flipping);
         targetedCard = null;
         cards.clear();
-        returnedCards.clear();
+        cardsFaceUp.clear();
         gameData = new GameData();
         fillResourceList();
         fillCardList();

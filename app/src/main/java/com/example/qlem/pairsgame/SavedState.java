@@ -21,7 +21,7 @@ public class SavedState extends View.BaseSavedState {
     /**
      * The current list of cards face up.
      */
-    List<Card> returnedCards;
+    List<Card> cardsFaceUp;
 
     /**
      * The current information about the game.
@@ -53,7 +53,7 @@ public class SavedState extends View.BaseSavedState {
     public void writeToParcel(Parcel out, int flags) {
         super.writeToParcel(out, flags);
         out.writeList(cards);
-        out.writeList(returnedCards);
+        out.writeList(cardsFaceUp);
         out.writeParcelable(gameData, flags);
     }
 
