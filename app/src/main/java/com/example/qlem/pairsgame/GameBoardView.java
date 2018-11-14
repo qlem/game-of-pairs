@@ -366,6 +366,7 @@ public class GameBoardView extends View {
     @Override
     public Parcelable onSaveInstanceState() {
         removeCallbacks(flipping);
+        targetedCard = null;
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
         ss.cards = cards;
